@@ -5,7 +5,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 
-from .serializers import PostSerializer, GroupSerializer, CommentSerializer
+from .serializers import (PostSerializer, GroupSerializer, CommentSerializer,
+                          FollowSerializer)
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -54,3 +55,12 @@ class CommentViewSet(viewsets.ModelViewSet):
             raise PermissionDenied('Нельзя менять чужой контент!')
         instance.delete()
 
+
+class FollowViewSet(viewsets.ModelViewSet):
+    serializer_class = FollowSerializer
+
+    def get_queryset(self):
+        return self.request.user.follower.all()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
