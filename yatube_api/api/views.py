@@ -1,12 +1,11 @@
 from rest_framework import viewsets, filters
-
-from posts.models import Post, Group
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
+from posts.models import Post, Group
+from .permissions import IsOwnerOrReadOnly
 from .serializers import (PostSerializer, GroupSerializer, CommentSerializer,
                           FollowSerializer)
 
@@ -14,12 +13,13 @@ from .serializers import (PostSerializer, GroupSerializer, CommentSerializer,
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    permission_classes = (IsOwnerOrReadOnly,)
 
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsOwnerOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('group',)
@@ -40,7 +40,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsOwnerOrReadOnly,)
 
     def get_queryset(self):
         post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
