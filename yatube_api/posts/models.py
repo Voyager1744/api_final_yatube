@@ -4,6 +4,7 @@ from django.db import models
 User = get_user_model()
 QNT_SYMBOL_TEXT = 20
 
+
 class Group(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
